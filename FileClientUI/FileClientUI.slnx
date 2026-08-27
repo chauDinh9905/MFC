@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="../Shared/Shared.vcxitems" Id="58d267c3-0424-4e4e-ad00-7fb55854a942" />
+  <Project Path="FileClientUI.vcxproj" />
+</Solution>

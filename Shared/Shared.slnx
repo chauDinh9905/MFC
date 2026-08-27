@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../FileClientUI/FileClientUI.vcxproj" Id="5ceaa7fe-3e3c-0051-4897-2dcf00f18cf3" />
+  <Project Path="../FileService/FileService.vcxproj" Id="fd1b5455-a640-4f4f-8928-a7e6149355e2" />
+  <Project Path="D:/Users/Public/Documents/CODE/Ccode/MFC/FileService/Shared/Shared.vcxitems" Id="58d267c3-0424-4e4e-ad00-7fb55854a942" />
+</Solution>
