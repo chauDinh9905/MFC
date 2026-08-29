@@ -39,6 +39,9 @@
     <ClInclude Include="PipeClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UiStrings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileClientUI.cpp">

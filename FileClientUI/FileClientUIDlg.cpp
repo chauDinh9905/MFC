@@ -8,7 +8,8 @@
 #include "FileClientUIDlg.h"
 #include "afxdialogex.h"
 #include "PipeClient.h"
-
+#include "UiStrings.h"
+#include "LanguageSettings.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -84,18 +85,8 @@ BOOL CFileClientUIDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// Add "About..." menu item to system menu.
-
-	// IDM_ABOUTBOX must be in the system command range.
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-	ASSERT(IDM_ABOUTBOX < 0xF000);
-
-	CDialogEx::OnInitDialog();
-
 	m_currentLang = LanguageSettings::Load(); // Lab 7
 	ApplyLanguageToControls();
-
-	return TRUE;
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
@@ -109,15 +100,7 @@ BOOL CFileClientUIDlg::OnInitDialog()
 
 void CFileClientUIDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
-	}
-	else
-	{
-		CDialogEx::OnSysCommand(nID, lParam);
-	}
+	
 }
 
 // If you add a minimize button to your dialog, you will need the code below
@@ -189,16 +172,23 @@ void CFileClientUIDlg::OnDropdownBtnDelete(NMHDR* pNMHDR, LRESULT* pResult)
 void CFileClientUIDlg::OnClickedBtnLangEn()
 {
 	// TODO: Add your control notification handler code here
+	m_currentLang = _T("en");
+	ApplyLanguageToControls();
+	LanguageSettings::Save(m_currentLang);
 }
 
 void CFileClientUIDlg::OnClickedBtnLangVi()
 {
 	// TODO: Add your control notification handler code here
+	m_currentLang = _T("vi");
+	ApplyLanguageToControls();
+	LanguageSettings::Save(m_currentLang);
 }
 
 void CFileClientUIDlg::OnClickedBtnOpendir()
 {
 	// TODO: Add your control notification handler code here
+	ShellExecute(nullptr, _T("open"), _T("explorer.exe"), _T("C:\\Windows"), nullptr, SW_SHOWNORMAL);
 }
 void CFileClientUIDlg::DoFileAction(FileAction action)
 {
@@ -222,4 +212,10 @@ void CFileClientUIDlg::DoFileAction(FileAction action)
 	GetDlgItem(IDC_BTN_DELETE)->EnableWindow(TRUE);
 
 	m_staticResult.SetWindowText(ok ? resp.message : err);
+}
+
+void CFileClientUIDlg::ApplyLanguageToControls() {
+	GetDlgItem(IDC_BTN_CREATE)->SetWindowText(UiStrings::Get(UiKey::CreateButton, m_currentLang));
+	GetDlgItem(IDC_BTN_DELETE)->SetWindowText(UiStrings::Get(UiKey::DeleteButton, m_currentLang));
+	GetDlgItem(IDC_BTN_OPENDIR)->SetWindowText(UiStrings::Get(UiKey::OpenDirTooltip, m_currentLang));
 }
