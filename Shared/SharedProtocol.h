@@ -19,6 +19,7 @@ struct FileRequest
 struct FileResponse
 {
     BOOL    success;
+    DWORD errorCode;
     wchar_t message[512];
 };
 

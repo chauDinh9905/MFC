@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Shared\SharedProtocol.h" />
+    <ClInclude Include="MessageProvider.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileOperationHandler.cpp" />

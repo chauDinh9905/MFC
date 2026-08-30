@@ -42,25 +42,56 @@ static bool IsPathInsideWhitelist(const std::wstring& fullPath)
     return false;
 }
 
+static bool EnsureParentDirectoryExists(const wstring& filePath, DWORD& outError) {
+    wstring dir = filePath.substr(0, filePath.find_last_of(L'\\'));
+    int result = SHCreateDirectoryExW(nullptr, dir.c_str(), nullptr);
+    if (result == ERROR_SUCCESS || result == ERROR_ALREADY_EXISTS) return true;
+    outError = (DWORD)result;
+    return false;
+}
+
+static bool ValidatePathFormat(const wchar_t* rawPath, wstring& fullPath, DWORD& errorCode, MsgKey& errKey) {
+    if (rawPath == nullptr || wcslen(rawPath) == 0) {
+        errKey = MsgKey::InvalidPath;
+        errorCode = ERROR_INVALID_PARAMETER;
+        return false;
+    }
+    wchar_t buffer[MAX_PATH] = {};
+    DWORD len = GetFullPathNameW(rawPath, MAX_PATH, buffer, nullptr);
+    if (len == 0 || len >= MAX_PATH) {
+        errKey = MsgKey::InvalidPath;
+        errorCode = GetLastError();
+        return false;
+    }
+    fullPath = buffer;
+    if (fullPath.back() == L'\\'){
+        errKey = MsgKey::InvalidPath;
+        errorCode = ERROR_INVALID_NAME;
+        return false;
+    }
+    return true;
+}
+
 FileResponse HandleRequest(const FileRequest& req)
 {
     FileResponse resp = {};
     MessageProvider msg(req.lang);
 
-    wchar_t fullPath[MAX_PATH] = {};
-    DWORD len = GetFullPathNameW(req.path, MAX_PATH, fullPath, nullptr);
+    wstring fullPath;
+    DWORD errorCode = 0;
+    MsgKey errKey;
 
-    if (len == 0 || len >= MAX_PATH)
-    {
+    if (!ValidatePathFormat(req.path, fullPath, errorCode, errKey)) {
         resp.success = FALSE;
-        wcscpy_s(resp.message, msg.Get(MsgKey::InvalidPath));
+        resp.errorCode = errorCode;
+        swprintf_s(resp.message, L"%s (Ma loi: %lu)", msg.Get(errKey), errorCode);
         return resp;
     }
-
     if (!IsPathInsideWhitelist(fullPath))
     {
+        resp.errorCode = errorCode;
         resp.success = FALSE;
-        wcscpy_s(resp.message, msg.Get(MsgKey::PathNotAllowed));
+        swprintf_s(resp.message, L"%s (Ma loi: %lu)", msg.Get(errKey), errorCode);
         return resp;
     }
 
@@ -68,20 +99,30 @@ FileResponse HandleRequest(const FileRequest& req)
     {
     case FileAction::Create:
     {
-        if (GetFileAttributesW(fullPath) != INVALID_FILE_ATTRIBUTES)
+        if (GetFileAttributesW(fullPath.c_str()) != INVALID_FILE_ATTRIBUTES)
         {
             resp.success = FALSE;
+            resp.errorCode = ERROR_ALREADY_EXISTS;
             wcscpy_s(resp.message, msg.Get(MsgKey::FileAlreadyExists));
             return resp;
         }
+        DWORD dirErr = 0;
+        if (!EnsureParentDirectoryExists(fullPath, dirErr)) {
+            resp.success = FALSE;
+            resp.errorCode = dirErr;
+            swprintf_s(resp.message, L"%s (Ma loi: %lu)", msg.Get(MsgKey::UnexpectedError), dirErr);
+            return resp;
+        }
 
-        HANDLE hFile = CreateFileW(fullPath, GENERIC_WRITE, 0, nullptr,
+        HANDLE hFile = CreateFileW(fullPath.c_str(), GENERIC_WRITE, 0, nullptr,
             CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
 
         if (hFile == INVALID_HANDLE_VALUE)
         {
+            DWORD err = GetLastError();
             resp.success = FALSE;
-            if (GetLastError() == ERROR_ACCESS_DENIED)
+            resp.errorCode = err;
+            if (err == ERROR_ACCESS_DENIED)
                 wcscpy_s(resp.message, msg.Get(MsgKey::AccessDenied));
             else
                 wcscpy_s(resp.message, msg.Get(MsgKey::UnexpectedError));
@@ -90,21 +131,26 @@ FileResponse HandleRequest(const FileRequest& req)
         CloseHandle(hFile);
 
         resp.success = TRUE;
+        resp.errorCode = 0;
         wcscpy_s(resp.message, msg.Get(MsgKey::CreateSuccess));
         return resp;
     }
     case FileAction::Delete:
     {
-        if (GetFileAttributesW(fullPath) == INVALID_FILE_ATTRIBUTES)
+        if (GetFileAttributesW(fullPath.c_str()) == INVALID_FILE_ATTRIBUTES)
         {
+            DWORD err = GetLastError();
             resp.success = FALSE;
-            wcscpy_s(resp.message, msg.Get(MsgKey::FileNotFound));
+            resp.errorCode = err;
+            swprintf_s(resp.message, L"%s (Ma loi: %lu)", msg.Get(MsgKey::FileNotFound), err);
             return resp;
         }
 
-        if (!DeleteFileW(fullPath))
+        if (!DeleteFileW(fullPath.c_str()))
         {
+            DWORD err = GetLastError();
             resp.success = FALSE;
+            resp.errorCode = err;
             if (GetLastError() == ERROR_ACCESS_DENIED)
                 wcscpy_s(resp.message, msg.Get(MsgKey::AccessDenied));
             else
@@ -113,6 +159,7 @@ FileResponse HandleRequest(const FileRequest& req)
         }
 
         resp.success = TRUE;
+        resp.errorCode = 0;
         wcscpy_s(resp.message, msg.Get(MsgKey::DeleteSuccess));
         return resp;
     }

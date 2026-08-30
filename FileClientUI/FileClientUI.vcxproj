@@ -204,6 +204,7 @@
     <ClInclude Include="FileClientUI.h" />
     <ClInclude Include="FileClientUIDlg.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="LanguageSettings.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PipeClient.h" />
     <ClInclude Include="Resource.h" />
@@ -213,6 +214,7 @@
   <ItemGroup>
     <ClCompile Include="FileClientUI.cpp" />
     <ClCompile Include="FileClientUIDlg.cpp" />
+    <ClCompile Include="LanguageSettings.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -228,6 +230,11 @@
     <None Include="res\FileClientUI.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\..\Downloads\flag_en.ico" />
+    <Image Include="..\..\..\..\..\Downloads\flag_vn.ico" />
+    <Image Include="..\..\..\..\..\Downloads\icon_folder.ico" />
+    <Image Include="..\..\..\..\..\Downloads\logo_shield.ico" />
+    <Image Include="..\..\..\..\..\Downloads\logo_text.bmp" />
     <Image Include="res\FileClientUI.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

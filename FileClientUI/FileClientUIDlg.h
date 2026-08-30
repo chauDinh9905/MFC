@@ -41,7 +41,16 @@ public:
 	afx_msg void OnClickedBtnOpendir();
 	CStatic m_staticResult;
 	CString m_currentLang; // "vi" hoặc "en"
+	CStatic m_staticFlag;
 
 	void DoFileAction(FileAction action);
 	void ApplyLanguageToControls();
+	afx_msg void OnStnClickedStaticResult();
+	afx_msg void OnStnClickedBtnOpendir();
+	afx_msg void OnStnClickedBtnClose();
+	afx_msg void OnClickedIconFoler();
+	afx_msg void OnClickedStaticFlag();
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
 };
